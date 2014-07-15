@@ -1,44 +1,45 @@
 # ===================================================
 # RRest Example
-#
+# 
 # To run, run
-#   Rscript server_example.R 
+#    Rscript server_example.R 
 # 
 # For command line example, in another terminal, run
-# curl -X POST http://0.0.0.0:9090 -d '{"fun": "randomNormal", "params" : {"n" : 100}}'
-#
+# curl -X POST http://0.0.0.0:9090 -d '{"fun": "rnorm", "params" : {"n" : 100}}'
+# 
 # For R example, open another R session and run the contents of "client_example.R"
-
+# 
 # The server expects a JSON object of the following form:
 # {
-#	"fun" : functionName,
-#	"params" : {
-#		"param1Name" : param1Value,
-#		...
-#	}
+#    "fun" : functionName,
+#    "params" : {
+#       "param1Name" : param1Value,
+#       ...
+#    }
 # }
-
+# 
 # ==================================================
 
 
-source('rrest.R')
+source("rrest.R")
 
-# Define Sample Functions
-randomUniform <- function(p){
-  p <- lapply(p, as.numeric)
-  runif(p$n)
+setValue <- function(key, value) {
+   assign(key, value, envir = data_env)
+   NULL
 }
 
-randomNormal <- function(p){
-  p <- lapply(p, as.numeric)
-  rnorm(p$n)
+getValue <- function(key) {
+   get(key, envir = data_env)   
 }
 
 # Add to environment
 fun_env <- new.env()
-assign('randomUniform', randomUniform, env = fun_env)
-assign('randomNormal', randomNormal, env = fun_env)
+data_env <- new.env()
+assign("runif", runif, env = fun_env)
+assign("rnorm", rnorm, env = fun_env)
+assign("setValue", setValue, env = fun_env)
+assign("getValue", getValue, env = fun_env)
 
 # Start Server
-runServer(host = '0.0.0.0', port = 9090, app = list(call = restServer(fun_env)))
+runServer(host = "0.0.0.0", port = 9090, app = list(call = restServer(fun_env)))
 
